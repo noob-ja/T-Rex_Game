@@ -32,8 +32,6 @@ die_sound = pygame.mixer.Sound('../sprites/die.wav')
 checkPoint_sound = pygame.mixer.Sound('../sprites/checkPoint.wav')
 
 class TRex_game():
-    def __init__(self):
-        print('init')
 
     def disp_gameOver_msg(self,retbutton_image,gameover_image):
         retbutton_rect = retbutton_image.get_rect()
@@ -106,14 +104,10 @@ class TRex_game():
         self.highsc = Scoreboard(width*0.78)
         counter = 0
 
-        self.cacti = pygame.sprite.Group()
-        self.pteras = pygame.sprite.Group()
         self.clouds = pygame.sprite.Group()
-        self.last_obstacle = pygame.sprite.Group()
-
-        Cactus.containers = self.cacti
-        Ptera.containers = self.pteras
         Cloud.containers = self.clouds
+
+        self.obstacleController = ObstacleController(scr_size)
 
         retbutton_image,retbutton_rect = load_image('replay_button.png',35,31,-1)
         gameover_image,gameover_rect = load_image('game_over.png',190,11,-1)
@@ -157,46 +151,22 @@ class TRex_game():
                         if event.type == pygame.KEYUP:
                             if event.key == pygame.K_DOWN:
                                 self.playerDino.isDucking = False
-                for c in self.cacti:
-                    c.movement[0] = -1*gamespeed
-                    if pygame.sprite.collide_mask(self.playerDino,c):
-                        self.playerDino.isDead = True
-                        if pygame.mixer.get_init() != None:
-                            die_sound.play()
 
-                for p in self.pteras:
-                    p.movement[0] = -1*gamespeed
-                    if pygame.sprite.collide_mask(self.playerDino,p):
-                        self.playerDino.isDead = True
-                        if pygame.mixer.get_init() != None:
-                            die_sound.play()
-
-                if len(self.cacti) < 2:
-                    if len(self.cacti) == 0:
-                        self.last_obstacle.empty()
-                        self.last_obstacle.add(Cactus(gamespeed,40,40))
-                    else:
-                        for l in self.last_obstacle:
-                            if l.rect.right < width*0.7 and random.randrange(0,50) == 10:
-                                self.last_obstacle.empty()
-                                self.last_obstacle.add(Cactus(gamespeed, 40, 40))
-
-                if len(self.pteras) == 0 and random.randrange(0,200) == 10 and counter > 500:
-                    for l in self.last_obstacle:
-                        if l.rect.right < width*0.8:
-                            self.last_obstacle.empty()
-                            self.last_obstacle.add(Ptera(gamespeed, 46, 40))
+                if self.obstacleController.move(gamespeed, self.playerDino): # true if player is dead
+                    self.playerDino.isDead = True
+                    if pygame.mixer.get_init() != None:
+                        die_sound.play()
+                self.obstacleController.spawn(gamespeed, counter)
 
                 if len(self.clouds) < 5 and random.randrange(0,300) == 10:
                     Cloud(width,random.randrange(height/5,height/2))
 
                 self.playerDino.update(checkPoint_sound)
-                self.cacti.update()
-                self.pteras.update()
                 self.clouds.update()
                 self.new_ground.update()
                 self.scb.update(self.playerDino.score)
                 self.highsc.update(high_score)
+                self.obstacleController.update()
 
                 if pygame.display.get_surface() != None:
                     screen.fill(background_col)
@@ -206,9 +176,8 @@ class TRex_game():
                     if high_score != 0:
                         self.highsc.draw(screen)
                         screen.blit(HI_image,HI_rect)
-                    self.cacti.draw(screen)
-                    self.pteras.draw(screen)
                     self.playerDino.draw(screen)
+                    self.obstacleController.draw(screen)
 
                     pygame.display.update()
                 clock.tick(FPS)
@@ -249,7 +218,7 @@ class TRex_game():
                 if pygame.display.get_surface() != None:
                     self.disp_gameOver_msg(retbutton_image,gameover_image)
                     if high_score != 0:
-                        self.highsc.draw()
+                        self.highsc.draw(screen)
                         screen.blit(HI_image,HI_rect)
                     pygame.display.update()
                 clock.tick(FPS)
