@@ -24,6 +24,7 @@ class Dino():
         self.stand_pos_width = self.rect.width
         self.duck_pos_width = self.rect1.width
 
+
     def draw(self, screen):
         screen.blit(self.image,self.rect)
 

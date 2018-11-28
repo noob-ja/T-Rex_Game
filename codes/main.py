@@ -160,8 +160,6 @@ class TRex_game():
                         die_sound.play()
 
                 spawn_time = random.randrange(50, 150)
-                print('sss',spawn_time)
-                print('timer', timer)
                 if(timer >= spawn_time):
                     self.obstacleController.spawn(gamespeed, counter)
                     timer = 0
