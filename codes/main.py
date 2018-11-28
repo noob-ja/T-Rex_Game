@@ -29,7 +29,7 @@ iteration = 0
 
 screen = pygame.display.set_mode(scr_size)
 clock = pygame.time.Clock()
-pygame.display.set_caption("T-Rex Rush")
+pygame.display.set_caption("Genetically Modified T-Rex")
 
 jump_sound = pygame.mixer.Sound('../sprites/jump.wav')
 die_sound = pygame.mixer.Sound('../sprites/die.wav')
