@@ -68,21 +68,13 @@ class ObstacleController():
         return isDead
 
     def spawn(self, gamespeed, counter):
-        if len(self.cacti) < 2:
-            if len(self.cacti) == 0:
-                self.last_obstacle.empty()
-                self.last_obstacle.add(Cactus(gamespeed,40,40))
-            else:
-                for l in self.last_obstacle:
-                    if l.rect.right < self.width*0.7 and random.randrange(0,50) == 10:
-                        self.last_obstacle.empty()
-                        self.last_obstacle.add(Cactus(gamespeed, 40, 40))
-
-        if len(self.pteras) == 0 and random.randrange(0,200) == 10 and counter > 500:
-            for l in self.last_obstacle:
-                if l.rect.right < self.width*0.8:
-                    self.last_obstacle.empty()
-                    self.last_obstacle.add(Ptera(gamespeed, 46, 40))
+        value = random.randrange(0,10)
+        if(value == 5 or value == 6):
+            self.last_obstacle.empty()
+            self.last_obstacle.add(Ptera(gamespeed, 46, 40))
+        else:
+            self.last_obstacle.empty()
+            self.last_obstacle.add(Cactus(gamespeed,40,40))
 
     def update(self):
         self.cacti.update()

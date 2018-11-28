@@ -103,6 +103,7 @@ class TRex_game():
         self.scb = Scoreboard()
         self.highsc = Scoreboard(width*0.78)
         counter = 0
+        timer = 0
 
         self.clouds = pygame.sprite.Group()
         Cloud.containers = self.clouds
@@ -126,6 +127,7 @@ class TRex_game():
             while startMenu:
                 pass
             while not gameOver:
+
                 if pygame.display.get_surface() == None:
                     print("Couldn't load display surface")
                     gameQuit = True
@@ -156,7 +158,13 @@ class TRex_game():
                     self.playerDino.isDead = True
                     if pygame.mixer.get_init() != None:
                         die_sound.play()
-                self.obstacleController.spawn(gamespeed, counter)
+
+                spawn_time = random.randrange(50, 150)
+                print('sss',spawn_time)
+                print('timer', timer)
+                if(timer >= spawn_time):
+                    self.obstacleController.spawn(gamespeed, counter)
+                    timer = 0
 
                 if len(self.clouds) < 5 and random.randrange(0,300) == 10:
                     Cloud(width,random.randrange(height/5,height/2))
@@ -192,6 +200,7 @@ class TRex_game():
                     gamespeed += 1
 
                 counter = (counter + 1)
+                timer = (timer + 1)
 
             if gameQuit:
                 break
