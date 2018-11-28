@@ -20,7 +20,7 @@ class Generation:
     # mutations
     def mutations(self):
         new_pop = []
-        new_pop_size = (self.best_candidate_size * self.best_candidate_size) - len(self.population)
+        new_pop_size = (self.max_population_size) - len(self.population)
         if new_pop_size > self.max_population_size:
             new_pop_size = self.max_population_size
         if new_pop_size > 0:
@@ -31,23 +31,23 @@ class Generation:
 
     # mutate the weight of the layer of the candidate
     def mutate(self, candidate):
-        # mutated = copy.deepcopy(candidate)
-        mutated = candidate
+        mutated = copy.deepcopy(candidate)
+        # mutated = candidate
         mutated.L1 += self.mutate_weight(mutated.L1)
         mutated.L2 += self.mutate_weight(mutated.L2)
         return mutated
 
     # random mutate the weight of layer
     def mutate_weight(self, layer):
-        if random.uniform(0, 1) < 0.25:
-            return layer * (random.uniform(0, 1) - 0.25)
+        if random.uniform(0, 1) < 0.2:
+            return layer * (random.uniform(0, 1) - 0.5) * 3 + (random.uniform(0, 1) - 0.5)
         else:
             return 0
 
     # crossover
     def crossover(self):
         new_pop = []
-        new_pop_size = self.best_candidate_size * self.best_candidate_size
+        new_pop_size = self.best_candidate_size
         if new_pop_size > self.max_population_size:
             new_pop_size = self.max_population_size
         for i in range(new_pop_size):
@@ -57,10 +57,10 @@ class Generation:
         return new_pop
 
     def crossing_over(self, candidate1, candidate2, crossing_points=1):
-        # c1 = copy.deepcopy(candidate1)
-        # c2 = copy.deepcopy(candidate2)
-        c1 = candidate1
-        c2 = candidate2
+        c1 = copy.deepcopy(candidate1)
+        c2 = copy.deepcopy(candidate2)
+        # c1 = candidate1
+        # c2 = candidate2
         for i in range(crossing_points):
             c1.L1, c2.L1 = self.crossing_over_weight(c1.L1, c2.L1)
             c1.L2, c2.L2 = self.crossing_over_weight(c1.L2, c2.L2)
@@ -87,5 +87,6 @@ class Generation:
             self.population = self.population[:self.max_population_size]
 
     def get_outputs(self, input):
+        input = np.array(input)
         outputs = [pop.predict(input) for pop in self.population]
         return outputs

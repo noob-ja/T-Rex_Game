@@ -4,9 +4,8 @@ import random
 from collections import deque
 from dino import *
 
-queue = deque([])
+queue = deque()
 dino_right = 84
-distance = 0
 
 class Cactus(pygame.sprite.Sprite):
     def __init__(self,speed=5,sizex=-1,sizey=-1,scr_size=(600,150)):
@@ -23,20 +22,16 @@ class Cactus(pygame.sprite.Sprite):
         screen.blit(self.image,self.rect)
 
     def update(self):
-        # print('xxxxxxxxxxxxxxxxxxxxxxxx')
         self.rect = self.rect.move(self.movement)
-
-       
 
         if self.rect.right < 0:
             self.kill()
-        # print('<',self.rect.left < dino_right, 'left:', self.rect.left, 'dino: ',dino_right)
-        # print('len', len(queue))
+            queue.popleft()
+
         if self.rect.left < dino_right and len(queue) > 0 and self.limit > 0:
             # print('popcat.............................')
             self.limit = self.limit -1
-            queue.popleft()
-
+            # queue.popleft()
 
 
 class Ptera(pygame.sprite.Sprite):
@@ -57,21 +52,20 @@ class Ptera(pygame.sprite.Sprite):
         screen.blit(self.image,self.rect)
 
     def update(self):
-        # print('yyyyyyyyyyyyyyyyyyy')
         if self.counter % 10 == 0:
             self.index = (self.index+1)%2
         self.image = self.images[self.index]
         self.rect = self.rect.move(self.movement)
         self.counter = (self.counter + 1)
 
-
         if self.rect.right < 0:
             self.kill()
+            queue.popleft()
 
         if self.rect.left < dino_right and len(queue) > 0 and self.limit > 0:
             # print('poptera.............................')
             self.limit = self.limit - 1
-            queue.popleft()
+            # queue.popleft()
 
 class ObstacleController():
     def __init__(self, scr_size=(600,150)):
@@ -83,25 +77,23 @@ class ObstacleController():
         Cactus.containers = self.cacti
         Ptera.containers = self.pteras
 
-    def collide(self, player):
-        if(len(queue) > 0):
-            # print()
-            if pygame.sprite.collide_mask(player, queue[0]):
-                print('collide')
-                return True
+        queue.clear()
+
+    def collide(self, dino):
+        if len(queue) > 0:
+            for obs in queue:
+                if obs.rect.left <= 90:
+                    if pygame.sprite.collide_mask(dino, obs):
+                        return True
         return False
 
-    def _move(self, obstacleGroup, gamespeed, player):
-        isDead = False
+    def _move(self, obstacleGroup, gamespeed):
         for obstacle in obstacleGroup:
             obstacle.movement[0] = -1*gamespeed
-            if pygame.sprite.collide_mask(player, obstacle):    isDead = True
-        # return self.collide(player)
-        return isDead
 
 
-    def move(self, gamespeed, player):
-        isDead = self._move(self.cacti, gamespeed, player) or self._move(self.pteras, gamespeed, player)
+    def move(self, gamespeed):
+        isDead = self._move(self.cacti, gamespeed) or self._move(self.pteras, gamespeed)
         return isDead
 
     def spawn(self, gamespeed, counter):
@@ -116,12 +108,6 @@ class ObstacleController():
         queue.append(new_obs)
 
     def update(self):
-        global distance
-        if(len(queue)>0):
-            distance = queue[0].rect.left
-        # print(queue)
-        if(len(queue)>0):
-            print('dist', queue[0].rect.left)
         self.cacti.update()
         self.pteras.update()
 
@@ -130,6 +116,19 @@ class ObstacleController():
             self.cacti.draw(screen)
             self.pteras.draw(screen)
 
-    global get_Distance
-    def get_Distance():
-        return distance
+    def get_info(self):
+        if len(queue)>0:
+            obst = False
+            for obs in queue:
+                if obs.rect.left > 84:
+                    obst = obs
+                    break
+            if obst == False:
+                return [-1, -1, -1, -1]
+            dist = obst.rect.left - 84
+            dist_vert = obst.rect.bottom
+            width = obst.rect.right - obst.rect.left
+            height = obst.rect.top - obst.rect.bottom
+            return [dist, dist_vert, width, height]
+        else:
+            return [-1, -1, -1, -1]
