@@ -19,7 +19,7 @@ class Network:
         self.output_size = 2
 
         self.L1 = np.random.randn(self.input_size, self.hidden_size)
-        self.L2 = np.random.randn(eslf.hidden_size, self.output_size)
+        self.L2 = np.random.randn(self.hidden_size, self.output_size)
 
         self.fitness = 0
 

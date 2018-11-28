@@ -1,7 +1,7 @@
 import numpy as np
 import copy
 import random
-from network import *
+from .network import *
 
 class Generation:
     # generate initial population

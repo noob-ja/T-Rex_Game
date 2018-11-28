@@ -1,4 +1,4 @@
-from generation import *
+from .generation import *
 
 import sys
 import os
