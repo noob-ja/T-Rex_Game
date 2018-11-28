@@ -5,7 +5,9 @@ import sys
 import pygame
 import random
 from pygame import *
+import numpy as np
 
+from ai.dinoAI import *
 from util import *
 from dino import *
 from environment import *
@@ -98,7 +100,7 @@ class TRex_game():
         gameOver = False
         gameQuit = False
 
-        self.playerDino = Dino(44,47)
+        # self.playerDino = Dino(44,47)
         self.new_ground = Ground(-1*gamespeed)
         self.scb = Scoreboard()
         self.highsc = Scoreboard(width*0.78)
@@ -109,6 +111,7 @@ class TRex_game():
         Cloud.containers = self.clouds
 
         self.obstacleController = ObstacleController(scr_size)
+        self.dinoController = DinoController(44, 47)
 
         retbutton_image,retbutton_rect = load_image('replay_button.png',35,31,-1)
         gameover_image,gameover_rect = load_image('game_over.png',190,11,-1)
@@ -133,31 +136,28 @@ class TRex_game():
                     gameQuit = True
                     gameOver = True
                 else:
-                    for event in pygame.event.get():
-                        if event.type == pygame.QUIT:
-                            gameQuit = True
-                            gameOver = True
+                    # if pygame.display.get_surface() == None:
+                    #     print("Couldn't load display surface")
+                    #     return True
+                    # else:
+                    #     for event in pygame.event.get():
+                    #         if event.type == pygame.QUIT:
+                    #             return True
+                    #         if event.type == pygame.KEYDOWN:
+                    #             if event.key == pygame.K_SPACE or event.key == pygame.K_UP:
+                    #                 temp_dino.isJumping = True
+                    #                 temp_dino.isBlinking = False
+                    #                 temp_dino.movement[1] = -1*temp_dino.jumpSpeed
+                    self.dinoController.move(self.obstacleController.get_info(), jump_sound)
 
-                        if event.type == pygame.KEYDOWN:
-                            if event.key == pygame.K_SPACE:
-                                if self.playerDino.rect.bottom == int(0.98*height):
-                                    self.playerDino.isJumping = True
-                                    if pygame.mixer.get_init() != None:
-                                        jump_sound.play()
-                                    self.playerDino.movement[1] = -1*self.playerDino.jumpSpeed
+                # if self.obstacleController.move(gamespeed, self.playerDino): # true if player is dead
+                #     self.playerDino.isDead = True
+                #     if pygame.mixer.get_init() != None:
+                #         die_sound.play()
 
-                            if event.key == pygame.K_DOWN:
-                                if not (self.playerDino.isJumping and self.playerDino.isDead):
-                                    self.playerDino.isDucking = True
-
-                        if event.type == pygame.KEYUP:
-                            if event.key == pygame.K_DOWN:
-                                self.playerDino.isDucking = False
-
-                if self.obstacleController.move(gamespeed, self.playerDino): # true if player is dead
-                    self.playerDino.isDead = True
-                    if pygame.mixer.get_init() != None:
-                        die_sound.play()
+                dinoDead = []
+                for dino in self.dinoController.dinos:
+                    dinoDead.append(self.obstacleController.isCollided(dino))
 
                 spawn_time = random.randrange(50, 150)
                 print('sss',spawn_time)
@@ -169,7 +169,8 @@ class TRex_game():
                 if len(self.clouds) < 5 and random.randrange(0,300) == 10:
                     Cloud(width,random.randrange(height/5,height/2))
 
-                self.playerDino.update(checkPoint_sound)
+                # self.playerDino.update(checkPoint_sound)
+                self.dinoController.update(dinoDead, checkPoint_sound)
                 self.clouds.update()
                 self.new_ground.update()
                 self.scb.update(self.playerDino.score)
@@ -184,16 +185,23 @@ class TRex_game():
                     if high_score != 0:
                         self.highsc.draw(screen)
                         screen.blit(HI_image,HI_rect)
-                    self.playerDino.draw(screen)
+                    # self.playerDino.draw(screen)
+                    self.dinoController.draw(screen)
                     self.obstacleController.draw(screen)
 
                     pygame.display.update()
                 clock.tick(FPS)
 
-                if self.playerDino.isDead:
+                # if self.playerDino.isDead:
+                #     gameOver = True
+                #     if self.playerDino.score > high_score:
+                #         high_score = self.playerDino.score
+
+                if np.all(dinoDead):
                     gameOver = True
-                    if self.playerDino.score > high_score:
-                        high_score = self.playerDino.score
+                    high_score_curr = self.dinoController.getHighestScore()
+                    if high_score_curr > high_score:
+                        high_score = high_score_curr
 
                 if counter%700 == 699:
                     self.new_ground.speed -= 1
