@@ -26,7 +26,8 @@ class Dino():
 
 
     def draw(self, screen):
-        screen.blit(self.image,self.rect)
+        if not self.isDead:
+            screen.blit(self.image,self.rect)
 
     def checkbounds(self):
         if self.rect.bottom > int(0.98*self.scr_height):
@@ -34,6 +35,10 @@ class Dino():
             self.isJumping = False
 
     def update(self, checkPoint_sound):
+        if self.isDead:
+           self.index = 4
+           return
+
         if self.isJumping:
             self.movement[1] = self.movement[1] + self.gravity
 
@@ -53,9 +58,6 @@ class Dino():
         else:
             if self.counter % 5 == 0:
                 self.index = (self.index + 1)%2 + 2
-
-        if self.isDead:
-           self.index = 4
 
         if not self.isDucking:
             self.image = self.images[self.index]

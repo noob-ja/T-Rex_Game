@@ -39,8 +39,8 @@ class Ptera(pygame.sprite.Sprite):
         (width,height)=scr_size
         pygame.sprite.Sprite.__init__(self,self.containers)
         self.images, self.rect = load_sprite_sheet('ptera.png',2,1,sizex,sizey,-1)
-        self.ptera_height = [height*0.82,height*0.75,height*0.60]
-        self.rect.centery = self.ptera_height[random.randrange(0,3)]
+        self.ptera_height = [height*0.82,height*0.75,height*0.60,height*0.50]
+        self.rect.centery = self.ptera_height[random.randrange(0,len(self.ptera_height))]
         self.rect.left = width + self.rect.width
         self.image = self.images[0]
         self.movement = [-1*speed,0]
@@ -87,19 +87,24 @@ class ObstacleController():
                         return True
         return False
 
-    def _move(self, obstacleGroup, gamespeed):
+    def _move(self, obstacleGroup, gamespeed, player=None):
         for obstacle in obstacleGroup:
             obstacle.movement[0] = -1*gamespeed
 
+        if not player is None:
+            return self.collide(player)
+        else:
+            return False
 
-    def move(self, gamespeed):
-        isDead = self._move(self.cacti, gamespeed) or self._move(self.pteras, gamespeed)
+
+    def move(self, gamespeed, player=None):
+        isDead = self._move(self.cacti, gamespeed, player) or self._move(self.pteras, gamespeed, player)
         return isDead
 
     def spawn(self, gamespeed, counter):
         value = random.randrange(0,10)
         new_obs = False
-        if(value == 5 or value == 6):
+        if(value >= 5 and value <= 6):
             new_obs = Ptera(gamespeed, 46, 40)
         else:
             new_obs = Cactus(gamespeed,40,40)
@@ -126,7 +131,7 @@ class ObstacleController():
             if obst == False:
                 return [-1, -1, -1, -1]
             dist = obst.rect.left - 84
-            dist_vert = obst.rect.bottom
+            dist_vert = self.height - obst.rect.bottom
             width = obst.rect.right - obst.rect.left
             height = obst.rect.top - obst.rect.bottom
             return [dist, dist_vert, width, height]
