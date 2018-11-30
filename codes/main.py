@@ -54,9 +54,9 @@ class TRex_game():
         temp_dino.isBlinking = True
         gameStart = False
 
-        callout,callout_rect = load_image('call_out.png',196,45,-1)
-        callout_rect.left = width*0.05
-        callout_rect.top = height*0.4
+        # callout,callout_rect = load_image('call_out.png',196,45,-1)
+        # callout_rect.left = width*0.05
+        # callout_rect.top = height*0.4
 
         temp_ground,temp_ground_rect = load_sprite_sheet('ground.png',15,1,-1,-1,-1)
         temp_ground_rect.left = width/20
@@ -86,7 +86,7 @@ class TRex_game():
                 screen.blit(temp_ground[0],temp_ground_rect)
                 if temp_dino.isBlinking:
                     screen.blit(logo,logo_rect)
-                    screen.blit(callout,callout_rect)
+                    # screen.blit(callout,callout_rect)
                 temp_dino.draw(screen)
 
                 pygame.display.update()
@@ -97,7 +97,10 @@ class TRex_game():
 
     def dinoControl(self):
         if not hasattr(self, 'dinoController'):
-            self.dinoController = DinoController(44, 47, num_dino=12, num_best_dino=4)
+            self.dinoController = DinoController(44, 47, num_dino=20, num_best_dino=2)
+            oldDinos = readWeights()
+            if not oldDinos is None:
+                self.dinoController.loadDinos(oldDinos)
         else:
             self.dinoController.nextGeneration()
 
@@ -253,18 +256,18 @@ class TRex_game():
                     gameQuit = True
                     gameOver = False
                 else:
-                    if iteration % 5 == 0:
+                    if iteration % 10 == 0:
                         for event in pygame.event.get():
                             if event.type == pygame.QUIT:
                                 gameQuit = True
                                 gameOver = False
                             if event.type == pygame.KEYDOWN:
-                                if event.key == pygame.K_ESCAPE:
+                                if event.key == pygame.K_RETURN or event.key == pygame.K_SPACE:
+                                    gameOver = False
+                                else:
                                     gameQuit = True
                                     gameOver = False
 
-                                if event.key == pygame.K_RETURN or event.key == pygame.K_SPACE:
-                                    gameOver = False
                     else:
                         gameOver = False
                 self.highsc.update(high_score)
@@ -279,6 +282,7 @@ class TRex_game():
                 if gameOver == False:
                     print("iteration: ",iteration)
                     iteration = iteration +1
+                    saveWeights(self.dinoController.getBestCandidatesData())
                     self.gameplay()
 
         pygame.quit()

@@ -39,8 +39,9 @@ class Ptera(pygame.sprite.Sprite):
         (width,height)=scr_size
         pygame.sprite.Sprite.__init__(self,self.containers)
         self.images, self.rect = load_sprite_sheet('ptera.png',2,1,sizex,sizey,-1)
-        self.ptera_height = [height*0.82,height*0.75,height*0.60,height*0.50]
+        self.ptera_height = [height*0.82,height*0.75,height*0.60,height*0.20]
         self.rect.centery = self.ptera_height[random.randrange(0,len(self.ptera_height))]
+        # self.rect.centery = random.uniform(0.2,0.82)*height
         self.rect.left = width + self.rect.width
         self.image = self.images[0]
         self.movement = [-1*speed,0]
@@ -104,7 +105,7 @@ class ObstacleController():
     def spawn(self, gamespeed, counter):
         value = random.randrange(0,10)
         new_obs = False
-        if(value >= 5 and value <= 6):
+        if(value >= 5 and value <= 7):
             new_obs = Ptera(gamespeed, 46, 40)
         else:
             new_obs = Cactus(gamespeed,40,40)
@@ -133,7 +134,7 @@ class ObstacleController():
             dist = obst.rect.left - 84
             dist_vert = self.height - obst.rect.bottom
             width = obst.rect.right - obst.rect.left
-            height = obst.rect.top - obst.rect.bottom
+            height = obst.rect.bottom - obst.rect.top
             return [dist, dist_vert, width, height]
         else:
             return [-1, -1, -1, -1]

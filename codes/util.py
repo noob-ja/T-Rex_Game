@@ -3,6 +3,8 @@ import pygame
 from pygame import RLEACCEL
 
 img_path = '../sprites'
+weight_path = './weights'
+weight_file = 'weight'
 
 def load_image(
     name,
@@ -63,3 +65,34 @@ def load_sprite_sheet(
     sprite_rect = sprites[0].get_rect()
 
     return sprites,sprite_rect
+
+def saveWeights(candidate_weights):
+    if not os.path.exists(weight_path):
+        os.makedirs(weight_path)
+    with open(os.path.join(weight_path, weight_file), 'w') as file:
+        file.write(str(len(candidate_weights))+'\n')
+        for i in range(len(candidate_weights)):
+            for layer in candidate_weights[i]:
+                weight = ''
+                for weights in layer:
+                    weight += ','.join(str(w) for w in weights) + ';'
+                file.write(weight[:-1]+'\n')
+
+def readWeights():
+    if not os.path.exists(weight_path):
+        os.makedirs(weight_path)
+    candidates = []
+    if not os.path.isfile(os.path.join(weight_path, weight_file)):
+        return None
+    with open(os.path.join(weight_path, weight_file), 'r') as file:
+        lines = [line.strip() for line in file.readlines()]
+        if not lines:
+            return None
+        num_candidates = int(lines[0])
+        for i in range(num_candidates):
+            l1 = lines[i*2+1]
+            l2 = lines[i*2+2]
+            l1 = [[float(weight) for weight in weights.split(',')] for weights in l1.split(';')]
+            l2 = [[float(weight) for weight in weights.split(',')] for weights in l2.split(';')]
+            candidates.append([l1,l2])
+    return candidates

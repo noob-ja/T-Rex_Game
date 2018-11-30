@@ -12,8 +12,10 @@ class DinoController:
         self.dinos = [Dino(self.dino_x, self.dino_y) for i in range(self.num_dino)]
         self.generation = Generation(pop_size=num_dino, best_candidate_size=num_best_dino)
         self.threshold = threshold
-
         (self.width, self.height) = scr_size
+
+    def loadDinos(self, dino_weights):
+        self.generation.loadPopulation(dino_weights)
 
     def move(self, input, jump_sound):
         movements = self.generation.get_outputs(input)
@@ -27,8 +29,8 @@ class DinoController:
             if jump >= self.threshold:
                 if dino.rect.bottom == int(0.98*self.height):
                     dino.isJumping = True
-                    if pygame.mixer.get_init() != None:
-                        jump_sound.play()
+                    # if pygame.mixer.get_init() != None:
+                    #     jump_sound.play()
                     dino.movement[1] = -1*dino.jumpSpeed
 
             if duck >= self.threshold:
@@ -58,5 +60,15 @@ class DinoController:
 
     def nextGeneration(self):
         self.dinos = [Dino(self.dino_x, self.dino_y) for i in range(self.num_dino)]
-        self.generation.get_best_candidate()
+        self.generation.keep_best_candidate()
         self.generation.generate_new_population()
+
+    def getBestCandidatesData(self):
+        if not self.generation.get_best_candidate():
+            self.generation.keep_best_candidate()
+        candidates = self.generation.get_best_candidate()
+        weights = []
+        for c in candidates:
+            weight = c.getData()
+            weights.append(weight)
+        return weights

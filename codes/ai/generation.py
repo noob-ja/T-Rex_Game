@@ -11,8 +11,18 @@ class Generation:
         self.best_candidate = []
         self.best_candidate_size = best_candidate_size if best_candidate_size < pop_size else pop_size
 
-    # only keep the best candidate(s)
+    def loadPopulation(self, candidates):
+        self.population = []
+        for c in candidates:
+            self.population.append(Network(np.array(c[0]), np.array(c[1])))
+        for i in range(self.max_population_size - len(candidates)):
+            self.population.append(Network())
+
     def get_best_candidate(self):
+        return self.best_candidate
+
+    # only keep the best candidate(s)
+    def keep_best_candidate(self):
         self.population.sort(key=lambda x: x.fitness, reverse=True)
         self.population = self.population[:self.best_candidate_size]
         self.best_candidate = self.population
@@ -39,7 +49,7 @@ class Generation:
 
     # random mutate the weight of layer
     def mutate_weight(self, layer):
-        if random.uniform(0, 1) < 0.2:
+        if random.uniform(0, 1) < 0.5:
             return layer * (random.uniform(0, 1) - 0.5) * 3 + (random.uniform(0, 1) - 0.5)
         else:
             return 0
