@@ -29,11 +29,11 @@ class Network:
         return 0.5 * (1 + np.tanh(0.5 * z))
 
     def predict(self, input):
-        z2 = input.dot(self.L1)
-        a2 = np.tanh(z2)
-        z3 = a2.dot(self.L2)
-        yHat = self.sigmoid(z3)
-        return yHat
+        z = input.dot(self.L1)
+        a2 = self.sigmoid(z)
+        z2 = a2.dot(self.L2)
+        result = self.sigmoid(z2)
+        return result
 
     def getData(self):
         return [self.L1.tolist(), self.L2.tolist()]

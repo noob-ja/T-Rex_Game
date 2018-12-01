@@ -256,7 +256,7 @@ class TRex_game():
                     gameQuit = True
                     gameOver = False
                 else:
-                    if iteration % 10 == 0:
+                    if iteration % 10000 == 0:
                         for event in pygame.event.get():
                             if event.type == pygame.QUIT:
                                 gameQuit = True
