@@ -7,13 +7,11 @@ import random
 from pygame import *
 import numpy as np
 
-from ai.dinoAI import *
+from ai.dinoController import *
 from util import *
 from dino import *
 from environment import *
 from obstacle import *
-
-pygame.init()
 
 scr_size = (width,height) = (600,150)
 FPS = 60
@@ -25,17 +23,24 @@ background_col = (235,235,235)
 
 high_score = 0
 
-iteration = 0
+iteration = 1
+training = False
+fresh_pop = True
+epoch = 1
 
-screen = pygame.display.set_mode(scr_size)
-clock = pygame.time.Clock()
-pygame.display.set_caption("Genetically Modified T-Rex")
+play_sound = True
+human = True
 
-jump_sound = pygame.mixer.Sound('../sprites/jump.wav')
-die_sound = pygame.mixer.Sound('../sprites/die.wav')
-checkPoint_sound = pygame.mixer.Sound('../sprites/checkPoint.wav')
+class TRex_game:
+    def __init__(self):
+        pygame.init()
+        self.screen = pygame.display.set_mode(scr_size)
+        self.clock = pygame.time.Clock()
+        pygame.display.set_caption("Genetically Modified T-Rex")
 
-class TRex_game():
+        self.jump_sound = pygame.mixer.Sound('../sprites/jump.wav')
+        self.die_sound = pygame.mixer.Sound('../sprites/die.wav')
+        self.checkPoint_sound = pygame.mixer.Sound('../sprites/checkPoint.wav')
 
     def disp_gameOver_msg(self,retbutton_image,gameover_image):
         retbutton_rect = retbutton_image.get_rect()
@@ -46,25 +51,18 @@ class TRex_game():
         gameover_rect.centerx = width / 2
         gameover_rect.centery = height*0.35
 
-        screen.blit(retbutton_image, retbutton_rect)
-        screen.blit(gameover_image, gameover_rect)
+        self.screen.blit(retbutton_image, retbutton_rect)
+        self.screen.blit(gameover_image, gameover_rect)
 
-    def introscreen(self):
-        temp_dino = Dino(44,47)
+    def intro(self):
+        temp_dino = Dino(44,47,playSound=play_sound)
         temp_dino.isBlinking = True
         gameStart = False
-
-        # callout,callout_rect = load_image('call_out.png',196,45,-1)
-        # callout_rect.left = width*0.05
-        # callout_rect.top = height*0.4
 
         temp_ground,temp_ground_rect = load_sprite_sheet('ground.png',15,1,-1,-1,-1)
         temp_ground_rect.left = width/20
         temp_ground_rect.bottom = height
 
-        logo,logo_rect = load_image('logo.png',240,40,-1)
-        logo_rect.centerx = width*0.6
-        logo_rect.centery = height*0.6
         while not gameStart:
             if pygame.display.get_surface() == None:
                 print("Couldn't load display surface")
@@ -75,44 +73,45 @@ class TRex_game():
                         return True
                     if event.type == pygame.KEYDOWN:
                         if event.key == pygame.K_SPACE or event.key == pygame.K_UP:
-                            temp_dino.isJumping = True
+                            temp_dino.jump(self.jump_sound)
                             temp_dino.isBlinking = False
-                            temp_dino.movement[1] = -1*temp_dino.jumpSpeed
 
-            temp_dino.update(checkPoint_sound)
+            temp_dino.update(self.checkPoint_sound, self.die_sound)
 
             if pygame.display.get_surface() != None:
-                screen.fill(background_col)
-                screen.blit(temp_ground[0],temp_ground_rect)
-                if temp_dino.isBlinking:
-                    screen.blit(logo,logo_rect)
-                    # screen.blit(callout,callout_rect)
-                temp_dino.draw(screen)
+                self.screen.fill(background_col)
+                self.screen.blit(temp_ground[0],temp_ground_rect)
+                temp_dino.draw(self.screen, True)
 
                 pygame.display.update()
 
-            clock.tick(FPS)
+            self.clock.tick(FPS)
             if temp_dino.isJumping == False and temp_dino.isBlinking == False:
                 gameStart = True
 
-    def dinoControl(self):
-        if not hasattr(self, 'dinoController'):
-            self.dinoController = DinoController(44, 47, num_dino=20, num_best_dino=2)
-            oldDinos = readWeights()
-            if not oldDinos is None:
-                self.dinoController.loadDinos(oldDinos)
-        else:
-            self.dinoController.nextGeneration()
+        return False
 
     def gameplay(self):
-        global high_score
-        global iteration
+        global high_score, iteration
         gamespeed = 10
         startMenu = False
         gameOver = False
         gameQuit = False
 
-        # self.playerDino = Dino(44,47)
+        if human:
+            self.dinoController = DinoController(44, 47, human, num_dino=1, num_best_dino=1, play_sound=play_sound)
+        else:
+            if not hasattr(self, 'dinoController'):
+                self.dinoController = DinoController(44, 47, human, num_dino=5, num_best_dino=2, play_sound=play_sound)
+                if not fresh_pop:
+                    oldDinos = readWeights()
+                    if not oldDinos is None:
+                        self.dinoController.loadDinos(oldDinos)
+            else:
+                self.dinoController.nextGeneration()
+        self.dinoController.loadSounds(self.checkPoint_sound, self.die_sound, self.jump_sound)
+        num_dino_alive = self.dinoController.num_dino
+
         self.new_ground = Ground(-1*gamespeed)
         self.scb = Scoreboard()
         self.highsc = Scoreboard(width*0.78)
@@ -122,8 +121,6 @@ class TRex_game():
         self.clouds = pygame.sprite.Group()
         Cloud.containers = self.clouds
 
-        self.dinoControl()
-        num_dino_alive = self.dinoController.num_dino
         self.obstacleController = ObstacleController(scr_size)
 
         retbutton_image,retbutton_rect = load_image('replay_button.png',35,31,-1)
@@ -148,48 +145,20 @@ class TRex_game():
                     print("Couldn't load display surface")
                     gameQuit = True
                     gameOver = True
+                    break
+
+                if human:
+                    self.dinoController.moveHuman()
                 else:
-                    if pygame.display.get_surface() == None:
-                        print("Couldn't load display surface")
-                        return True
-                    else:
-                        # for event in pygame.event.get():
-                        #     if event.type == pygame.QUIT:
-                        #         gameQuit = True
-                        #         gameOver = True
-                        #
-                        #     if event.type == pygame.KEYDOWN:
-                        #         if event.key == pygame.K_SPACE:
-                        #             if self.playerDino.rect.bottom == int(0.98*height):
-                        #                 self.playerDino.isJumping = True
-                        #                 if pygame.mixer.get_init() != None:
-                        #                     jump_sound.play()
-                        #                 self.playerDino.movement[1] = -1*self.playerDino.jumpSpeed
-                        #
-                        #         if event.key == pygame.K_DOWN:
-                        #             if not (self.playerDino.isJumping and self.playerDino.isDead):
-                        #                 self.playerDino.isDucking = True
-                        #
-                        #     if event.type == pygame.KEYUP:
-                        #         if event.key == pygame.K_DOWN:
-                        #             self.playerDino.isDucking = False
-
-                        inputs = self.obstacleController.get_info() + [gamespeed]
-                        self.dinoController.move(inputs, jump_sound)
-
-                # if self.obstacleController.move(gamespeed, self.playerDino): # true if player is dead
-                #     self.playerDino.isDead = True
-                #     if pygame.mixer.get_init() != None:
-                #         die_sound.play()
+                    inputs = self.obstacleController.get_info() + [gamespeed]
+                    self.dinoController.moveAI(inputs)
 
                 self.obstacleController.move(gamespeed)
 
                 dinoDead = []
                 for dino in self.dinoController.dinos:
-                    if dino.isDead:
-                        dinoDead.append(True)
-                    else:
-                        dinoDead.append(self.obstacleController.collide(dino))
+                    if dino.isDead: dinoDead.append(True)
+                    else:           dinoDead.append(self.obstacleController.collide(dino))
 
                 count_alive = np.size(dinoDead) - np.count_nonzero(dinoDead)
                 if count_alive != num_dino_alive:
@@ -206,34 +175,26 @@ class TRex_game():
 
                 high_score_curr = self.dinoController.getHighestScore()
 
-                # self.playerDino.update(checkPoint_sound)
-                self.dinoController.update(dinoDead, checkPoint_sound)
+                self.dinoController.update(dinoDead)
                 self.clouds.update()
                 self.new_ground.update()
                 self.scb.update(high_score_curr)
-                # self.scb.update(self.playerDino.score)
                 self.highsc.update(high_score)
                 self.obstacleController.update()
 
                 if pygame.display.get_surface() != None:
-                    screen.fill(background_col)
-                    self.new_ground.draw(screen)
-                    self.clouds.draw(screen)
-                    self.scb.draw(screen)
+                    self.screen.fill(background_col)
+                    self.new_ground.draw(self.screen)
+                    self.clouds.draw(self.screen)
+                    self.scb.draw(self.screen)
                     if high_score != 0:
-                        self.highsc.draw(screen)
-                        screen.blit(HI_image,HI_rect)
-                    # self.playerDino.draw(screen)
-                    self.dinoController.draw(screen)
-                    self.obstacleController.draw(screen)
+                        self.highsc.draw(self.screen)
+                        self.screen.blit(HI_image,HI_rect)
+                    self.dinoController.draw(self.screen, count_alive==0)
+                    self.obstacleController.draw(self.screen)
 
                     pygame.display.update()
-                clock.tick(FPS)
-
-                # if self.playerDino.isDead:
-                #     gameOver = True
-                #     if self.playerDino.score > high_score:
-                #         high_score = self.playerDino.score
+                self.clock.tick(FPS)
 
                 if np.all(dinoDead):
                     gameOver = True
@@ -256,7 +217,7 @@ class TRex_game():
                     gameQuit = True
                     gameOver = False
                 else:
-                    if iteration % 10000 == 0:
+                    if iteration >= epoch:
                         for event in pygame.event.get():
                             if event.type == pygame.QUIT:
                                 gameQuit = True
@@ -274,22 +235,24 @@ class TRex_game():
                 if pygame.display.get_surface() != None:
                     self.disp_gameOver_msg(retbutton_image,gameover_image)
                     if high_score != 0:
-                        self.highsc.draw(screen)
-                        screen.blit(HI_image,HI_rect)
+                        self.highsc.draw(self.screen)
+                        self.screen.blit(HI_image,HI_rect)
                     pygame.display.update()
-                clock.tick(FPS)
+                self.clock.tick(FPS)
 
                 if gameOver == False and gameQuit == False:
-                    print("iteration: ",iteration)
-                    iteration = iteration +1
-                    saveWeights(self.dinoController.getBestCandidatesData())
+                    if not human:
+                        print("iteration: ",iteration)
+                        iteration = (iteration + 1) % epoch
+                        if training:
+                            saveWeights(self.dinoController.getBestCandidatesData())
                     self.gameplay()
 
         pygame.quit()
         quit()
 
     def main(self):
-        isGameQuit = self.introscreen()
+        isGameQuit = self.intro()
         if not isGameQuit:
             self.gameplay()
 
