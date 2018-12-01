@@ -30,7 +30,7 @@ class Network:
 
     def predict(self, input):
         z = input.dot(self.L1)
-        a2 = self.sigmoid(z)
+        a2 = np.tanh(z)
         z2 = a2.dot(self.L2)
         result = self.sigmoid(z2)
         return result

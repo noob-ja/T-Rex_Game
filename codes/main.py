@@ -279,7 +279,7 @@ class TRex_game():
                     pygame.display.update()
                 clock.tick(FPS)
 
-                if gameOver == False:
+                if gameOver == False and gameQuit == False:
                     print("iteration: ",iteration)
                     iteration = iteration +1
                     saveWeights(self.dinoController.getBestCandidatesData())
