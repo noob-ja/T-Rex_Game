@@ -2,9 +2,9 @@ import os
 import pygame
 from pygame import RLEACCEL
 
-img_path = '../sprites'
-weight_path = './weights'
-weight_file = 'weight'
+import sys
+sys.path.append(os.pardir)
+import values
 
 def load_image(
     name,
@@ -13,7 +13,7 @@ def load_image(
     colorkey=None,
     ):
 
-    fullname = os.path.join(img_path, name)
+    fullname = os.path.join(values.sprite_path, name)
     image = pygame.image.load(fullname)
     image = image.convert()
     if colorkey is not None:
@@ -34,7 +34,7 @@ def load_sprite_sheet(
         scaley = -1,
         colorkey = None,
         ):
-    fullname = os.path.join(img_path,sheetname)
+    fullname = os.path.join(values.sprite_path,sheetname)
     sheet = pygame.image.load(fullname)
     sheet = sheet.convert()
 
@@ -67,9 +67,9 @@ def load_sprite_sheet(
     return sprites,sprite_rect
 
 def saveWeights(candidate_weights):
-    if not os.path.exists(weight_path):
-        os.makedirs(weight_path)
-    with open(os.path.join(weight_path, weight_file), 'w') as file:
+    if not os.path.exists(values.weight_path):
+        os.makedirs(values.weight_path)
+    with open(os.path.join(values.weight_path, values.weight), 'w') as file:
         file.write(str(len(candidate_weights))+'\n')
         for i in range(len(candidate_weights)):
             for layer in candidate_weights[i]:
@@ -79,12 +79,12 @@ def saveWeights(candidate_weights):
                 file.write(weight[:-1]+'\n')
 
 def readWeights():
-    if not os.path.exists(weight_path):
-        os.makedirs(weight_path)
+    if not os.path.exists(values.weight_path):
+        os.makedirs(values.weight_path)
     candidates = []
-    if not os.path.isfile(os.path.join(weight_path, weight_file)):
+    if not os.path.isfile(os.path.join(values.weight_path, values.weight)):
         return None
-    with open(os.path.join(weight_path, weight_file), 'r') as file:
+    with open(os.path.join(values.weight_path, values.weight), 'r') as file:
         lines = [line.strip() for line in file.readlines()]
         if not lines:
             return None

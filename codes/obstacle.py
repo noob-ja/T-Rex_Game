@@ -1,17 +1,16 @@
-from util import *
+from .util import *
 import pygame
 import random
 from collections import deque
-from dino import *
 
 queue = deque()
 dino_right = 84
 
 class Cactus(pygame.sprite.Sprite):
-    def __init__(self,speed=5,sizex=-1,sizey=-1,scr_size=(600,150)):
+    def __init__(self, img, speed=5, sizex=-1, sizey=-1, scr_size=(600,150)):
         (width,height)=scr_size
         pygame.sprite.Sprite.__init__(self,self.containers)
-        self.images, self.rect = load_sprite_sheet('cacti-small.png',3,1,sizex,sizey,-1)
+        self.images, self.rect = load_sprite_sheet(img,3,1,sizex,sizey,-1)
         self.rect.bottom = int(0.98*height)
         self.rect.left = width + self.rect.width
         self.image = self.images[random.randrange(0,3)]
@@ -35,13 +34,12 @@ class Cactus(pygame.sprite.Sprite):
 
 
 class Ptera(pygame.sprite.Sprite):
-    def __init__(self,speed=5,sizex=-1,sizey=-1,scr_size=(600,150)):
+    def __init__(self, img, speed=5, sizex=-1, sizey=-1, scr_size=(600,150)):
         (width,height)=scr_size
         pygame.sprite.Sprite.__init__(self,self.containers)
-        self.images, self.rect = load_sprite_sheet('ptera.png',2,1,sizex,sizey,-1)
+        self.images, self.rect = load_sprite_sheet(img,2,1,sizex,sizey,-1)
         self.ptera_height = [height*0.82,height*0.75,height*0.60,height*0.20]
         self.rect.centery = self.ptera_height[random.randrange(0,len(self.ptera_height))]
-        # self.rect.centery = random.uniform(0.2,0.82)*height
         self.rect.left = width + self.rect.width
         self.image = self.images[0]
         self.movement = [-1*speed,0]
@@ -69,8 +67,10 @@ class Ptera(pygame.sprite.Sprite):
             # queue.popleft()
 
 class ObstacleController():
-    def __init__(self, scr_size=(600,150)):
-        (self.width, self.height) = scr_size
+    def __init__(self, imgCactus, imgPtera, scr_size=(600,150)):
+        self.scr_size = (self.width, self.height) = scr_size
+        self.imgCactus = imgCactus
+        self.imgPtera = imgPtera
 
         self.cacti = pygame.sprite.Group()
         self.pteras = pygame.sprite.Group()
@@ -106,9 +106,9 @@ class ObstacleController():
         value = random.randrange(0,10)
         new_obs = False
         if(value >= 5 and value <= 7):
-            new_obs = Ptera(gamespeed, 46, 40)
+            new_obs = Ptera(img=self.imgPtera, speed=gamespeed, sizex=46, sizey=40, scr_size=self.scr_size)
         else:
-            new_obs = Cactus(gamespeed,40,40)
+            new_obs = Cactus(img=self.imgCactus, speed=gamespeed, sizex=40, sizey=40, scr_size=self.scr_size)
         self.last_obstacle.empty()
         self.last_obstacle.add(new_obs)
         queue.append(new_obs)

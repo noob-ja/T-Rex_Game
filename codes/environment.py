@@ -1,11 +1,11 @@
-from util import *
+from .util import *
 import pygame
 
 class Ground():
-    def __init__(self,speed=-5,scr_size=(600,150)):
+    def __init__(self, img, speed=-5, scr_size=(600,150)):
         (width,height)=scr_size
-        self.image,self.rect = load_image('ground.png',-1,-1,-1)
-        self.image1,self.rect1 = load_image('ground.png',-1,-1,-1)
+        self.image,self.rect = load_image(img,-1,-1,-1)
+        self.image1,self.rect1 = load_image(img,-1,-1,-1)
         self.rect.bottom = height
         self.rect1.bottom = height
         self.rect1.left = self.rect.right
@@ -26,9 +26,9 @@ class Ground():
             self.rect1.left = self.rect.right
 
 class Cloud(pygame.sprite.Sprite):
-    def __init__(self,x,y):
+    def __init__(self, x, y, img):
         pygame.sprite.Sprite.__init__(self,self.containers)
-        self.image,self.rect = load_image('cloud.png',int(90*30/42),30,-1)
+        self.image,self.rect = load_image(img,int(90*30/42),30,-1)
         self.speed = 1
         self.rect.left = x
         self.rect.top = y
@@ -43,10 +43,10 @@ class Cloud(pygame.sprite.Sprite):
             self.kill()
 
 class Scoreboard():
-    def __init__(self,x=-1,y=-1,scr_size=(600,150)):
+    def __init__(self, img, x=-1, y=-1, scr_size=(600,150)):
         (width,height)=scr_size
         self.score = 0
-        self.tempimages,self.temprect = load_sprite_sheet('numbers.png',12,1,11,int(11*6/5),-1)
+        self.tempimages,self.temprect = load_sprite_sheet(img,12,1,11,int(11*6/5),-1)
         self.image = pygame.Surface((55,int(11*6/5)))
         self.rect = self.image.get_rect()
         if x == -1:

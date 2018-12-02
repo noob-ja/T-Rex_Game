@@ -1,4 +1,4 @@
-import util
+import codes.util
 from ai.generation import *
 
 a = Generation()
@@ -12,4 +12,4 @@ for c in candidates:
 
 print(weights)
 
-util.saveWeights(weights)
+util.saveWeights(weights)s

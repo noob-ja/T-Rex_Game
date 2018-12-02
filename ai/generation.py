@@ -5,11 +5,14 @@ from .network import *
 
 class Generation:
     # generate initial population
-    def __init__(self, pop_size=10, best_candidate_size=2):
+    def __init__(self, pop_size=10, best_candidate_size=2, mutation_rate=0.5, mutation_range=(0.8, 1.2), crossing_points=1):
         self.max_population_size = pop_size
         self.population = [Network() for i in range(pop_size)]
         self.best_candidate = []
         self.best_candidate_size = best_candidate_size if best_candidate_size < pop_size else pop_size
+        self.mutation_rate = mutation_rate
+        self.mutation_range = mutation_range
+        self.crossing_points = crossing_points
 
     def loadPopulation(self, candidates):
         self.population = []
@@ -42,35 +45,32 @@ class Generation:
     # mutate the weight of the layer of the candidate
     def mutate(self, candidate):
         mutated = copy.deepcopy(candidate)
-        # mutated = candidate
-        mutated.L1 += self.mutate_weight(mutated.L1)
-        mutated.L2 += self.mutate_weight(mutated.L2)
+        mutated.L1 = self.mutate_weight(mutated.L1)
+        mutated.L2 = self.mutate_weight(mutated.L2)
         return mutated
 
     # random mutate the weight of layer
     def mutate_weight(self, layer):
-        if random.uniform(0, 1) < 0.5:
-            return layer * (random.uniform(0, 1) - 0.5) * 3 + (random.uniform(0, 1) - 0.5)
+        if random.uniform(0, 1) < self.mutation_rate:
+            return layer * (random.uniform(*self.mutation_range))
         else:
-            return 0
+            return layer
 
     # crossover
     def crossover(self):
         new_pop = []
-        new_pop_size = self.best_candidate_size
+        new_pop_size = (self.best_candidate_size*self.best_candidate_size)
         if new_pop_size > self.max_population_size:
             new_pop_size = self.max_population_size
         for i in range(new_pop_size):
             candidate1 = random.choice(self.best_candidate)
             candidate2 = random.choice(self.best_candidate)
-            new_pop.append(self.crossing_over(candidate1, candidate2))
+            new_pop.append(self.crossing_over(candidate1, candidate2, self.crossing_points))
         return new_pop
 
     def crossing_over(self, candidate1, candidate2, crossing_points=1):
         c1 = copy.deepcopy(candidate1)
         c2 = copy.deepcopy(candidate2)
-        # c1 = candidate1
-        # c2 = candidate2
         for i in range(crossing_points):
             c1.L1, c2.L1 = self.crossing_over_weight(c1.L1, c2.L1)
             c1.L2, c2.L2 = self.crossing_over_weight(c1.L2, c2.L2)
