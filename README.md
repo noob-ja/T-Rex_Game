@@ -6,8 +6,8 @@ Google Chrome offline T-Rex game recreated in Python using pygame.
 Genetic algorithm is implemented.
 
 ### Prerequisites:
-pip install numpy
-pip install pygame
+* pip install numpy
+* pip install pygame
 
 ### How to run the game:   
 * Run main.py
