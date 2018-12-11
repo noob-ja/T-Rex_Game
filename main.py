@@ -7,6 +7,8 @@ import random
 from pygame import *
 import numpy as np
 
+sys.path.append(os.curdir)
+
 from ai.dinoController import *
 from codes.util import *
 from codes.dino import *
