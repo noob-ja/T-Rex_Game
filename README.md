@@ -20,3 +20,4 @@ Genetic algorithm is implemented.
 #### References:
 * http://www.pygame.org/docs
 * https://github.com/shivamshekhar/Chrome-T-Rex-Rush
+* https://github.com/utay/dino-ml
