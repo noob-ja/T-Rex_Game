@@ -1,4 +1,4 @@
-__author__ = "Jen Wai, Yu Kang, Jia Aun"
+__author__ = "Jen Wai, Yu Kang, Jia Aun, Zobaid"
 
 import os
 import sys
@@ -239,7 +239,7 @@ class TRex_game:
                     gameQuit = True
                     gameOver = False
                 else:
-                    if not training or (iteration > 0 and iteration%epoch==0):
+                    if human or (iteration > 0 and iteration%epoch==0):
                         for event in pygame.event.get():
                             if event.type == pygame.QUIT:
                                 gameQuit = True

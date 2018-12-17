@@ -34,7 +34,7 @@ training ai config
 weight_path = './ai/weights/'
 weight = 'weight'
 
-epoch = 1
+epoch = 100
 training = False       # to save weights or not
 fresh_pop = False       # to load weights or not
 
